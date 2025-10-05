@@ -10,7 +10,9 @@ import com.project.back_end.repositories.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,11 +42,11 @@ public class AppointmentService {
      */
     public Appointment requestAppointment(Appointment appointment) {
         // Validate that patient and doctor exist
-        if (!patientRepository.existsById(appointment.getPatientId())) {
-            throw new IllegalArgumentException("Patient not found with ID: " + appointment.getPatientId());
+        if (!patientRepository.existsById(appointment.getPatient().getId())) {
+            throw new IllegalArgumentException("Patient not found with ID: " + appointment.getPatient().getId());
         }
-        if (!doctorRepository.existsById(appointment.getDoctorId())) {
-            throw new IllegalArgumentException("Doctor not found with ID: " + appointment.getDoctorId());
+        if (!doctorRepository.existsById(appointment.getDoctor().getId())) {
+            throw new IllegalArgumentException("Doctor not found with ID: " + appointment.getDoctor().getId());
         }
         // Validate appointment time is in the future
         if (appointment.getAppointmentDatetime().isBefore(LocalDateTime.now())) {
@@ -113,4 +115,19 @@ public class AppointmentService {
     public List<Appointment> findAppointmentsByDoctorId(Long doctorId) {
         return appointmentRepository.findByDoctorId(doctorId);
     }
+    
+    /**
+     * Finds all appointments for a given doctor on a specific date.
+     * @param doctorId The ID of the doctor.
+     * @param date The specific date to retrieve appointments for.
+     * @return A list of appointments.
+     */
+    public List<Appointment> findAppointmentsByDoctorIdAndDate(Long doctorId, LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+        // This assumes a method exists in AppointmentRepository like:
+        // List<Appointment> findByDoctorIdAndAppointmentDatetimeBetween(Long doctorId, LocalDateTime start, LocalDateTime end);
+        return appointmentRepository.findByDoctorIdAndAppointmentDatetimeBetween(doctorId, startOfDay, endOfDay);
+    }
 }
+
