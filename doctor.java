@@ -1,6 +1,7 @@
 package com.project.back_end.models;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 // Assuming you are using JPA for ORM (Object-Relational Mapping)
 import javax.persistence.Entity;
@@ -9,6 +10,10 @@ import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.CollectionTable;
+import javax.persistence.JoinColumn;
+
 
 /**
  * Represents a Doctor in the Smart Clinic Management System.
@@ -40,6 +45,11 @@ public class Doctor {
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
 
+    @ElementCollection
+    @CollectionTable(name = "doctor_available_times", joinColumns = @JoinColumn(name = "doctor_id"))
+    @Column(name = "available_time", nullable = false)
+    private List<String> availableTimes;
+
     @Column(name = "created_at", updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createdAt;
 
@@ -51,13 +61,14 @@ public class Doctor {
     }
 
     // Parameterized constructor
-    public Doctor(Long userId, String firstName, String lastName, String specialty, String qualifications, String bio) {
+    public Doctor(Long userId, String firstName, String lastName, String specialty, String qualifications, String bio, List<String> availableTimes) {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.specialty = specialty;
         this.qualifications = qualifications;
         this.bio = bio;
+        this.availableTimes = availableTimes;
     }
 
     // Getters and Setters
@@ -118,6 +129,14 @@ public class Doctor {
         this.bio = bio;
     }
 
+    public List<String> getAvailableTimes() {
+        return availableTimes;
+    }
+
+    public void setAvailableTimes(List<String> availableTimes) {
+        this.availableTimes = availableTimes;
+    }
+
     public Timestamp getCreatedAt() {
         return createdAt;
     }
@@ -144,8 +163,10 @@ public class Doctor {
                 ", specialty='" + specialty + '\'' +
                 ", qualifications='" + qualifications + '\'' +
                 ", bio='" + bio + '\'' +
+                ", availableTimes=" + availableTimes +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';
     }
 }
+
