@@ -11,6 +11,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Column;
 import javax.persistence.Enumerated;
 import javax.persistence.EnumType;
+import javax.persistence.ManyToOne;
+import javax.persistence.JoinColumn;
+import javax.persistence.FetchType;
 
 /**
  * Represents an Appointment in the Smart Clinic Management System.
@@ -31,11 +34,13 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "patient_id", nullable = false)
-    private Long patientId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
 
-    @Column(name = "doctor_id", nullable = false)
-    private Long doctorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "doctor_id", nullable = false)
+    private Doctor doctor;
 
     @Column(name = "appointment_datetime", nullable = false)
     private LocalDateTime appointmentDatetime;
@@ -58,9 +63,9 @@ public class Appointment {
     }
 
     // Parameterized constructor
-    public Appointment(Long patientId, Long doctorId, LocalDateTime appointmentDatetime, String reason) {
-        this.patientId = patientId;
-        this.doctorId = doctorId;
+    public Appointment(Patient patient, Doctor doctor, LocalDateTime appointmentDatetime, String reason) {
+        this.patient = patient;
+        this.doctor = doctor;
         this.appointmentDatetime = appointmentDatetime;
         this.reason = reason;
     }
@@ -75,20 +80,20 @@ public class Appointment {
         this.id = id;
     }
 
-    public Long getPatientId() {
-        return patientId;
+    public Patient getPatient() {
+        return patient;
     }
 
-    public void setPatientId(Long patientId) {
-        this.patientId = patientId;
+    public void setPatient(Patient patient) {
+        this.patient = patient;
     }
 
-    public Long getDoctorId() {
-        return doctorId;
+    public Doctor getDoctor() {
+        return doctor;
     }
 
-    public void setDoctorId(Long doctorId) {
-        this.doctorId = doctorId;
+    public void setDoctor(Doctor doctor) {
+        this.doctor = doctor;
     }
 
     public LocalDateTime getAppointmentDatetime() {
@@ -135,8 +140,8 @@ public class Appointment {
     public String toString() {
         return "Appointment{" +
                 "id=" + id +
-                ", patientId=" + patientId +
-                ", doctorId=" + doctorId +
+                ", patientId=" + (patient != null ? patient.getId() : "null") +
+                ", doctorId=" + (doctor != null ? doctor.getId() : "null") +
                 ", appointmentDatetime=" + appointmentDatetime +
                 ", status=" + status +
                 ", reason='" + reason + '\'' +
@@ -145,3 +150,4 @@ public class Appointment {
                 '}';
     }
 }
+
