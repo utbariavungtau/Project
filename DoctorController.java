@@ -5,12 +5,16 @@ import com.project.back_end.models.Doctor;
 import com.project.back_end.models.DoctorAvailability;
 // Assume a DoctorService exists to handle business logic
 import com.project.back_end.services.DoctorService;
+// Assume a TokenService exists for validation
+import com.project.back_end.services.TokenService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +27,9 @@ public class DoctorController {
 
     @Autowired
     private DoctorService doctorService; // Service to interact with doctor data
+    
+    @Autowired
+    private TokenService tokenService; // Service for token validation
 
     /**
      * Get a list of all doctors.
@@ -43,7 +50,7 @@ public class DoctorController {
     public ResponseEntity<Doctor> getDoctorById(@PathVariable Long id) {
         Optional<Doctor> doctor = doctorService.findDoctorById(id);
         return doctor.map(ResponseEntity::ok)
-                     .orElseGet(() -> ResponseEntity.notFound().build());
+                       .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /**
@@ -62,16 +69,35 @@ public class DoctorController {
     }
 
     /**
-     * Get the availability schedule for a specific doctor.
-     * @param id The ID of the doctor.
-     * @return A list of availability slots.
+     * Get the availability schedule for a specific doctor on a given date.
+     * This endpoint is secured and requires a valid token following the specified URL pattern.
+     * @param user The user requesting the information.
+     * @param doctorId The ID of the doctor.
+     * @param date The date to check for availability (YYYY-MM-DD).
+     * @param token The authorization token.
+     * @return A list of availability slots for the specified doctor and date.
      */
-    @GetMapping("/{id}/availability")
-    public ResponseEntity<List<DoctorAvailability>> getDoctorAvailability(@PathVariable Long id) {
-        if (!doctorService.findDoctorById(id).isPresent()) {
+    @GetMapping("/availability/{user}/{doctorId}/{date}/{token}")
+    public ResponseEntity<List<DoctorAvailability>> getDoctorAvailability(
+            @PathVariable String user,
+            @PathVariable Long doctorId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @PathVariable String token) {
+        
+        // Step 1: Validate the token.
+        // In a real application, this service would handle complex validation logic.
+        if (!tokenService.isTokenValid(token, user)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        // Step 2: Check if the doctor exists.
+        if (!doctorService.findDoctorById(doctorId).isPresent()) {
             return ResponseEntity.notFound().build();
         }
-        List<DoctorAvailability> availability = doctorService.getDoctorAvailability(id);
+
+        // Step 3: Retrieve availability for the specific doctor and date.
+        // Assuming the service layer can filter availability by date.
+        List<DoctorAvailability> availability = doctorService.findAvailabilityByDoctorIdAndDate(doctorId, date);
         return ResponseEntity.ok(availability);
     }
 
@@ -91,3 +117,4 @@ public class DoctorController {
         return new ResponseEntity<>(savedAvailability, HttpStatus.CREATED);
     }
 }
+
