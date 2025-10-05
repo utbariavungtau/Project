@@ -29,10 +29,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+      
+      # Grant execute permission for the mvnw wrapper
+      - name: Make gradlew executable
+        run: chmod +x ./mvnw
 
-      # Builds the project with Maven
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
+      # Builds the project with the Maven wrapper
+      - name: Build with Maven Wrapper
+        run: ./mvnw -B package --file pom.xml
 
       # Optional: Upload artifact for deployment or other jobs
       - name: Upload artifact
@@ -40,3 +44,4 @@ jobs:
         with:
           name: java-app
           path: target/*.jar
+
