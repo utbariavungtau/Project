@@ -4,6 +4,7 @@ import com.project.back_end.models.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -18,4 +19,14 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
      * @return An Optional containing the patient if found.
      */
     Optional<Patient> findByEmail(String email);
+
+    /**
+     * Finds patients whose first name or last name contains the given search term, ignoring case.
+     * This is useful for implementing a patient search feature.
+     * @param firstName The search term for the first name.
+     * @param lastName The search term for the last name.
+     * @return A list of patients matching the criteria.
+     */
+    List<Patient> findByFirstNameContainingOrLastNameContainingAllIgnoreCase(String firstName, String lastName);
 }
+
